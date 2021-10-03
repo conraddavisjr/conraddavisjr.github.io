@@ -1,0 +1,101 @@
+:root {
+  --main-bg-color: rgba(107, 107, 107, 0.5);
+  --samsung-thumb-height: 35.5vh;
+  --wig-thumb-height: 71vh;
+  --audi-thumb-height: 35vh;
+  --gather-thumb-height: 30vh;
+  --thumb-top-margin: 0.5vh;
+  --cdj-blue: #51a6efe6;
+  --arrow-top-val: 43.5vh;
+}
+
+.about-container {
+  opacity: 0;
+  visibility: hidden;
+  transition: .5s;
+}
+
+.about-nav {
+  position: fixed;
+  transition: opacity, bottom, background-color, 1.5s;
+  width: 100%;
+  height: 60px;
+  bottom: -25px;
+  background-color: #101010;
+  z-index: 1;
+}
+
+.about-nav.set-subnav {
+  background-color: rgba(242, 242, 242, 1);
+  bottom: 61px;
+}
+
+.about-nav.set-subnav .nav-about-skills,
+.about-nav.set-subnav .nav-about-bio {
+  bottom: 70px;
+  color: #4a4a4a;
+  height: 40px;
+  border: 1px solid #dedede;
+  background-color: rgba(242, 242, 242, 1)
+}
+
+.nav-about-skills,
+.nav-about-bio {
+  position: fixed;
+  bottom: 52%;
+  transform: translate(-50%, 0%);
+  width: 140px;
+  height: 60px;
+  border: 2px solid white;
+  color: white;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  cursor: pointer;
+  transition: bottom, color, background-color, 1s, transform 0s, border 0s;
+  background-color: rgba(86, 86, 86, 0.53);
+}
+
+.about-nav.set-subnav .nav-about-skills:hover,
+.about-nav.set-subnav .nav-about-bio:hover,
+.nav-about-skills:hover,
+.nav-about-bio:hover {
+  background-color: white;
+  border: 1px solid #c5c5c5;
+  color: black;
+  transition: background-color 0s, color 0s, bottom 1s;
+}
+
+.about-nav.set-subnav .nav-about-skills.active,
+.about-nav.set-subnav .nav-about-bio.active {
+  pointer-events: none;
+  background-color: white;
+  border: 1px solid #c5c5c5;
+}
+
+.nav-about-skills {
+  left: calc(50% - 75px);
+}
+
+.nav-about-bio {
+  left: calc(50% + 78px);
+}
+
+.about-down-arrow {
+  cursor: pointer;
+  width: 24px;
+  z-index: 1;
+  /* top: calc(100% - var(--arrow-top-val)); */
+  position: absolute;
+  left: 50%;
+  animation: about-arrow-bob 2s 1s infinite forwards ease-in-out;
+  transition: opacity .3s;
+}
+
+@keyframes about-arrow-bob {
+  0% { top: calc(100% - var(--arrow-top-val)) }
+  25% { top: calc(100% - (var(--arrow-top-val) - 10px)) }
+  50% { top: calc(100% - var(--arrow-top-val) + 5px) }
+  75% { top: calc(100% - (var(--arrow-top-val) - 10px)) }
+  100% { top: calc(100% - var(--arrow-top-val)) }
+}

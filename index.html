@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<title>Conrad Davis Jr</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, minimum-scale=1">
+	<link rel="shortcut icon" type="image/png" href="favicon.png"/>
+
 	<style type="text/css">
 		@import url('https://fonts.googleapis.com/css?family=Quicksand:300, 900');
+
+		/* TEMP */
+		/* .dg.ac {
+			z-index: 10 !important
+		}
+		.dg.ac .title {
+			display: none;
+		} */
+		/* TEMP */
+
 
 		html, body {
 			margin: 0;
@@ -12,6 +24,7 @@
 			overflow: hidden;
 	    line-height: 1.4;
 	    font-family: 'Quicksand', sans-serif;
+			height: 100%;
 	    transition: 1s;
 		}
 		header {
@@ -29,15 +42,15 @@
 	    transform: translate(-50%);
 	    top: calc(50% - 3rem);
 	    left: 50%;
-	    color: white;
+	    color: #a7a7a7;
       font-size: 6.5vw;
 	    width: 100%;
 	    text-align: center;
 	    text-transform: uppercase;
 	    z-index: 3;
-	    display: table;
+			display: table;
 		}
-		.loader-takover {
+		.loader-takeover {
 			position: fixed;
 			width: 43px;
 			height: 43px;
@@ -59,7 +72,7 @@
 		}
 		.svg-grid-container svg.load-icon {
       height: 300px;
-      transform: translate(-50%, -50%) scale(0.5);
+      transform: translate(-50%, -50%) scale(.5);
 	    opacity: 0;
 	    left: 50%;
 	    position: absolute;
@@ -80,10 +93,21 @@
 			z-index: 4;
 			width: 100%;
 		}
+		nav .constraint {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin: 0 auto;
+			width: 100%;
+			max-width: 1400px;
+			box-sizing: border-box;
+			padding: 0 30px;
+		}
+		
 		nav li {
 			position: relative;
 	    list-style: none;
-	    cursor: pointer;
+			cursor: pointer;
 		}
 		nav li::after{
 	    content: "";
@@ -93,10 +117,24 @@
 	    height: 2px;
 	    background-color: black;
 	    left: 0;
-	    transition: 0.3s;
+	    transition: .3s;
 		}
 		nav li:hover::after{
 	    width: 100%;
+		}
+		nav li.active{
+	    font-weight: 500;
+		}
+		nav li.active::after{
+	    width: 100%;
+		}
+		@media (min-width: 600px) {
+			nav .constraint {
+				justify-content: center;
+			}
+			nav li {
+				margin: 0 40px;
+			}
 		}
 		.ui-panel {
 			height: 100%;
@@ -104,7 +142,7 @@
 			position: fixed;
 			top: 0;
 			width: 100%;
-			z-index: 1;
+			z-index: 2;
 		}
 		#webgl {
 			display: none;
@@ -125,7 +163,7 @@
       background: linear-gradient(-45deg, #00b09b, #96c93d, #23A6D5, #23D5AB);
       background: linear-gradient(-45deg, #cacaca, #ffffff, #353535, #404040);
 			background-size: 400% 400%;
-			animation: loadingImage 2s ease infinite;
+			animation: loadingImage 2s 2s ease infinite;
 		}
 		@keyframes loadingImage {
 			0% { color: white; opacity: .6; background-position: 0% 50% }
@@ -143,9 +181,9 @@
 			width: 100%;
 	    height: calc(100% - 61px);
 	    overflow: auto;
-			z-index: 3;
+			z-index: 1;
 		}
-		.ui-scaffold .contraint {
+		.ui-scaffold .constraint {
 			display: flex;
 	    flex-direction: column;
 			align-items: center;
@@ -160,28 +198,28 @@
 			box-sizing: border-box;
 	    position: relative;
       margin: 0 auto;
-	    width: 90%;
-	  }
-		.ui-scaffold .util-bar,
-		.ui-scaffold .fold-content,
-		.portfolio-details__util-bar,
-		.portfolio-details__fold-content {
-      padding: 0.5em 1em 0.7em;
-	  }
+		}
 	  .ui-scaffold .img-loading:before {
 	  	content: 'LOADING...';
 	  	opacity: 0;
 			background-size: 400% 400%;
-	  	animation: loadingImage 2s 2s ease infinite;
+	  	animation: loadingImage 2s 3s ease infinite;
 	  }
 		.ui-scaffold .hero,
 		.portfolio-details__hero {
 			min-height: 15em;
+			width: 90%;
+		}
+		.portfolio-details__hero {
+			display: flex;
+			align-items: center;
+			width: 100%;
 		}
 		.ui-scaffold .util-bar,
 		.portfolio-details__util-bar {
 			margin-top: 1em;
 			min-height: 6em;
+			width: 90%;
 		}
 		.ui-scaffold .fold-content,
 		.portfolio-details__fold-content {
@@ -210,7 +248,7 @@
 		}
 		.ui-scaffold .box-draw:after {
 	    z-index: -1;
-			animation: drawBoxBR 1s 0.9s linear forwards;
+			animation: drawBoxBR 1s .9s linear forwards;
 		}
 		@keyframes drawBoxTL {
 			0% { border-top-color: white; }
@@ -228,33 +266,39 @@
 			100% { border-bottom-color: white; border-left-color: white; width: 100%; height: 100%;}
 		}
 	</style>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-46364716-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-46364716-1');
+	</script>
 </head>
 <body>
 
 	<header>Conrad Davis Jr</header>
 
-	<!-- enter world button -->
-	/<div class="title">Development | Design | UX</div>
-
-	<div class="loader-takover"></div>
-
+	<div class="title">Development | Design | UX</div>
+	<div class="loader-takeover"></div>
 	<div class="svg-grid-container"></div>
 
 	<!-- main nav items -->
 	<nav>
-		<li class="home-button">HOME</li>
-		<li class="about-button">ABOUT</li>
-		<li class="work-button">WORK</li>
-		<li class="skills-button">SKILLS</li>
+		<ul class="constraint">
+			<li class="about-button">ABOUT</li>
+			<li class="work-button">WORK</li>
+			<li class="contact-button">CONTACT</li>
+		</ul>
 	</nav>
 
 	<!-- Overlay panel for content -->
 	<div class="ui-panel"></div>
 
-
 	<!-- UI Scaffold -->
 	<div class="ui-scaffold">
-		<div class="contraint">
+		<div class="constraint">
 			<div class="hero box-draw"> <span class="img-loading"></span></div>
 			<div class="util-bar box-draw"> <span class="img-loading"></span></div>
 			<div class="fold-content box-draw"> <span class="img-loading"></span></div>
@@ -263,7 +307,9 @@
 
 	<!-- container for webgl world -->
 	<div id="webgl"></div>
-
+	<!-- TEMP -->
+	<!-- <script type="text/javascript" src="lib/dat.gui.min.js"></script> -->
+	<!-- TEMP END -->
 	<script type="text/javascript" src="lib/tweenmax.js"></script>
 	<script async type="module" src="main.js"></script>
 </body>

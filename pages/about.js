@@ -1,107 +1,317 @@
 let aboutPageHasLoaded = false;
-let aboutContainerName = 'about-container';
-let aboutContainer;
+let aboutContainer = 'about-container';
+let aboutBioContainer;
+let aboutScrollArrow;
+let aboutNavName = 'about-nav';
+let aboutPath = 'pages/about';
+let aboutNav;
+let aboutEffectsBorder;
+let aboutEffectsFill;
+let aboutLoadedSubpages = {};
+let lastScrollTop = 0;
+const aboutTl = new TimelineLite();
 
-function aboutPage(uiPanel, apiCollection, loadObject, scene, camera) {
+const animationGraph = {
+  skills: {
+    targetCoords: {x: -23.7, y: 20.72, z: 8.8, rx: 0, ry: -4.7, rz: 0},
+    timing: 2000,
+    delay: 1000
+  }
+}
+
+function aboutPage(uiPanel, apiCollection, scene, camera) {
   // if the page hasn't loaded yet, populate it in the DOM
   if(!aboutPageHasLoaded) {
-    // ui template styles
-  	let aboutContainerStyles = `
-      width: 100%;
-      height: 100%;
-      overflow: scroll;
-      opacity: 0;
-      transition: 0.5s;
-    `;
 
-    let aboutInnerStyles = `
-      background-color: white;
-      margin-top: 80vh;
-    `;
+    // load ui template styles, then build the view
+    apiCollection.loadStyles(`${aboutPath}/styles.css`).then(buildUI());
 
-    let imageStyles = `
-      background-color: gray;
-      display: block;
-      width: 200px;
-      height: 200px;
-      float: right;
-      margin: 0 0 2rem 2rem;
-    `
+    // loadObject('models/about_section.obm', scene);
 
-    let contentStyles = `
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 1rem 2rem 5rem;
-    `
-
-    loadObject('models/about_section.obm', scene);
-
-    // generate ui template
-    let interfaceUI = `
-      <div class='${aboutContainerName} content-container' style='${aboutContainerStyles}'>
-        <div class='inner' style='${aboutInnerStyles}'>
-          <div class='content' style='${contentStyles}'>
-            <h2>About me</h2>
-            <p>
-              <img src="" alt="" style='${imageStyles}'>
-              <p>Since I was six years old, I've been around computers and gadgets. I was the child who meddled with devices and toys;
-              piecing them apart and seeing what they were made of. I wanted to know what made things work, why it was attractive to me, and how I could improve it.</p>
-
-              <p>I was naturally drawn to fine arts, performance, and presentation. As a child I drew, sang, played piano,
-              designed presentations on my PC and made video games for my younger brother and I. I enjoyed impressing people with beautiful art.
-              I love presentation, and websites are among the epitome of presentations. When I build websites, I don't think about the site, I think about the people I'm building it for.</p>
-
-              <p>Websites are, as I like to think of them, human interaction and I apply the interactions from my life to my work.
-              Let's take design into consideration. When you see something you are attracted to for the first time, you're not
-              immediately evaluating its traits, initially, you are simply indulged in the attraction; it's intuitive and it's natural; that is beauty.
-              I strive to incorporate these qualities and invoke these emotions into my design. Development is the "electricity" of our industry,
-              its everywhere and involved in practically everything we do.</p>
-
-              <p>It runs 24/7 behind the curtains and works until the moment it doesn't; our lights turn out,
-              and everything comes to a hault while we suddenly realize how many things it was powering. Solid development works without you noticing.
-              It's rapid, problem-free, and graceful; those are the qualities I focus on when I develop. Great design draws us in, it makes things useable;
-              great development keeps us there, it makes things useful. The marriage of the two creates effective technology and I absolutely love when they come together.
-              I love learning new things, this passion led me to develop quite a few hobbies and interests like dancing, playing piano, exercise, singing (shower quality),
-              and trying something new quite often.</p>
-            </p>
+    function buildUI() {
+      // generate ui template
+      let interfaceUI = `
+        <div class="${aboutContainer}">
+          <div class=${aboutNavName}>
+            <div class="nav-about-skills"> <span>Skills</span> </div>
+            <div class="nav-about-bio"> <span>Bio</span> </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
 
-  	uiPanel.insertAdjacentHTML('afterbegin', interfaceUI);
-    let lastScrollTop = 0;
-    if (!aboutContainer) {
-      aboutContainer = document.querySelector(`.${aboutContainerName}`);
-
-      // watch scroll events on the about container
-      aboutContainer.addEventListener('scroll', (e) => {
-        let st = e.target.scrollTop;
-        let scrollVal = 0.001;
-
-        if (st > lastScrollTop && st > 0) {
-          // scrolling down
-          camera.rotation.y += scrollVal;
-          camera.position.z += scrollVal;
-        } else {
-          // scrolling up
-          if (camera.rotation.y >= -2.64 || camera.position.z >= -2.03) {
-            camera.rotation.y -= scrollVal * 1.4;
-            camera.position.z -= scrollVal * 1.4;
-          }
-        }
-        lastScrollTop = st;
-      });
+      uiPanel.insertAdjacentHTML('afterbegin', interfaceUI);
+      mountInterface();
     }
+
+    function mountInterface() {
+      aboutContainer = document.querySelector(`.${aboutContainer}`);
+      aboutNav = document.querySelector(`.${aboutNavName}`);
+      let aboutButton = document.querySelector('.about-button');
+      let skillsBtn = document.querySelector('.nav-about-skills');
+      let bioBtn = document.querySelector('.nav-about-bio');
+
+      aboutButton.addEventListener('click', () => {
+        // set the current sub-page to this page
+        window.currentSubpage = null;
+        hideSubpages();
+        renderSubNav(false);
+      });
+
+      skillsBtn.addEventListener('click', () => {
+        if (pageAlreadySelected('skills')) return;
+
+        hideSubpages();
+
+        apiCollection.handlePageTransitions(
+          'aboutSkills',
+          () => renderSubPage('skills')
+        );
+        renderSubNav(true);
+        setActiveNavItem(skillsBtn);
+      });
+
+      bioBtn.addEventListener('click', () => {
+        if (pageAlreadySelected('bio')) return;
+
+        hideSubpages();
+
+        apiCollection.handlePageTransitions(
+          'aboutBio',
+          () => renderSubPage('bio')
+        );
+        renderSubNav(true);
+        setActiveNavItem(bioBtn);
+      });
+
+      renderAboutPage();
+    }
+
+    function pageAlreadySelected(page) {
+      return page == window.currentSubpage;
+    }
+
+    function renderSubNav(willRender) {
+      willRender ?
+        aboutNav.classList.add('set-subnav') :
+        aboutNav.classList.remove('set-subnav');
+    }
+
+    function renderSubPage(page) {
+      // set the current sub-page to this page
+      window.currentSubpage = page;
+
+      if (Object.keys(aboutLoadedSubpages).includes(page)) {
+        // reveal the sub-page
+        // if the page is skills, set custom animation
+        if (page == 'skills') {
+          skillsPageAnimation(page);
+        } else {
+          aboutTl.to(
+            aboutLoadedSubpages[page], .5,
+            {display: 'block', opacity: 1}
+          );
+        }
+
+      } else {
+        loadPage(page);
+      }
+    }
+
+    function loadPage(page) {
+      apiCollection.loadStyles(`${aboutPath}/subpages/${page}.css`)
+      apiCollection.loadScript(`${aboutPath}/subpages/${page}.js`)
+      .then(() => {
+        // inject the sub-page component into the about container
+        aboutContainer.insertAdjacentHTML(
+          'beforeend', window[`${page}Subpage`]()
+        );
+
+        // register the loaded sub-page
+        aboutLoadedSubpages[page] =
+            aboutContainer.querySelector(`.about-sub-page-${page}`);
+
+        if (window.currentSubpage == 'bio') {
+          aboutBioContainer = document.querySelector('.about-sub-page-bio');
+          aboutScrollArrow = aboutBioContainer.querySelector('.about-down-arrow');
+          initBioContainerScrollEffect();
+          setScrollArrowTimer();
+          setScrollArrowBehavior();
+        };
+
+        if (page == 'skills') {
+          aboutEffectsBorder = 
+              aboutLoadedSubpages[page].querySelector('.about-effects-border');
+          aboutEffectsFill =
+              aboutLoadedSubpages[page].querySelector('.about-effects-fill');
+          skillsContent =
+              aboutLoadedSubpages[page].querySelector('.skills-content');
+
+          skillsPageAnimation(page);
+        } else {
+          // reveal the sub-page
+          aboutTl.to(
+            aboutLoadedSubpages[page], .5,
+            {display: 'block', opacity: 1}
+          );
+        }
+      })
+    }
+
+    function hideSubpages() {
+      const subpages =
+          Object.keys(aboutLoadedSubpages)
+                .map(subpage => aboutLoadedSubpages[subpage]);
+
+      if (!subpages) return;
+
+      aboutTl.to(subpages, .5, {opacity: 0})
+      aboutTl.set(subpages, {display: 'none'})
+    }
+
+    function setActiveNavItem(item) {
+      Array.from(aboutNav.children).forEach(
+        (item) => item.classList.remove('active')
+      )
+      item.classList.add('active');
+    }
+
+    // declare that that about page has loaded,
+    // voiding the need to reload it.
+    aboutPageHasLoaded = true;
+  }
+  else {
+    renderAboutPage();
   }
 
-  aboutPageHasLoaded = true;
+  function skillsPageAnimation(page) {
+    // get the diameter of the fill circle
+    // then figure the difference from the window dimensions
+    // and calculate scale value
 
-  // fade in the UI
-  setTimeout(fadeIn, 50);
+    const circleDiameter =
+        aboutEffectsFill.clientWidth - (aboutEffectsFill.clientWidth / 4);
+
+    const largerWindowDim = window.innerWidth > window.innerHeight ?
+      window.innerWidth : window.innerHeight;
+
+    const scaleValue = largerWindowDim / circleDiameter;
+
+    // Intro animation for the skill section
+    // 
+    // reveal the skills page container
+    aboutTl.to(
+      aboutLoadedSubpages[page], .5,
+      {display: 'block', opacity: 1}
+    )
+    // pulse the circle border
+    .to(
+      aboutEffectsBorder, 1,
+      {scale: 3, borderWidth: '1px', opacity: 0}, '-=.5'
+    )
+    // scale the circle to a fullscreen takeover
+    .to(
+      aboutEffectsFill, 1,
+      {scale: scaleValue, ease: Back.easeIn.config(.7)}, '-=1'
+    )
+    // make the skills container scrollable and fullscreen
+    .set(
+      aboutLoadedSubpages[page],
+      {
+        overflow: 'scroll',
+        width: `100vw`,
+        height: `100vh`,
+        backgroundColor: 'white'
+      }
+    )
+    // fade out the circle fill
+    .to(
+      aboutEffectsFill, .3,
+      {opacity: 0}
+    )
+    // remove the about effects border and fill
+    .set(
+      [aboutEffectsBorder, aboutEffectsFill],
+      {display: 'none'}
+    )
+    // reveal the skills page content
+    .set(
+      skillsContent,
+      {opacity: 1}
+    )
+  }
 
   function fadeIn() {
     aboutContainer.style.opacity = 1;
     aboutContainer.style.visibility = 'visible';
+  }
+  // fade in the UI
+  function renderAboutPage() {
+    // fade in the UI
+    setTimeout(fadeIn, 50);
+  }
+
+  function initBioContainerScrollEffect() {
+    // watch scroll events on the about container
+    aboutBioContainer.addEventListener('scroll', (e) => {
+      let st = e.target.scrollTop;
+      let scrollVal = 0.001;
+      const camYMax = 4.71;
+      const camYMin = 4.56;
+
+      if (st > lastScrollTop && st > 0 && camera.rotation.y < camYMax) {
+        // scrolling down
+        camera.rotation.y += scrollVal;
+      }
+      else {
+        camera.rotation.y -= scrollVal * 1.1;
+      }
+      // else if (camera.rotation.y > camYMin) {
+      //   // scrolling up
+
+      //   camera.rotation.y -= scrollVal * 1.6;
+      // }
+      lastScrollTop = st;
+    });
+  }
+
+  function setScrollArrowTimer() {
+    let playState = true;
+
+    setInterval(() => {
+      if (playState) {
+        aboutScrollArrow.style.animationPlayState = 'paused';
+        playState = false
+      } else {
+        aboutScrollArrow.style.animationPlayState = 'running';
+        playState = true
+      }
+    }, 5000)
+  }
+
+  function setScrollArrowBehavior() {
+    // listen for clicks
+    aboutScrollArrow.addEventListener('click', () => {
+      aboutBioContainer.scrollTo({
+        top: window.innerHeight - 270,
+        left: 0,
+        behavior: 'smooth'
+      });
+    })
+
+    // on scroll, incrementally hide the scroll arrow
+    aboutBioContainer.addEventListener('scroll', () => {
+      let aboutScrollTop = aboutBioContainer.scrollTop;
+
+      if (aboutScrollTop < 40) {
+        let opacityInt = Number(aboutScrollArrow.style.opacity);
+        aboutScrollArrow.style.opacity = (opacityInt + .1);
+      } else if (aboutScrollTop > 40 && aboutScrollArrow.style.opacity >= 0) { 
+        aboutScrollArrow.style.opacity -= .1;
+      }
+
+      if (aboutScrollTop == 0) {
+        aboutScrollArrow.style.opacity = 1;
+      }
+    })
   }
 }

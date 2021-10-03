@@ -108,10 +108,12 @@ export default function linearGradient(svgGridItems, cb) {
 		// run the animation, fill coloring for the linear gradient
 		let duration = 2;
 		let delay = `-=${duration - 0.1}`;
+		let title = document.querySelector('.title');
 		tl.to(gatherGridItems(r1.items, svgGridItems), duration, r1.styles)
 		tl.to(gatherGridItems(r2.items, svgGridItems), duration, r2.styles, delay)
 		tl.to(gatherGridItems(r3.items, svgGridItems), duration, r3.styles, delay)
 		tl.to(gatherGridItems(r4.items, svgGridItems), duration, r4.styles, delay)
+		tl.to(title, .5, {color: 'white'}, delay)
 		tl.to(gatherGridItems(r5.items, svgGridItems), duration, r5.styles, delay)
 		tl.to(gatherGridItems(r6.items, svgGridItems), duration, r6.styles, delay)
 		tl.to(gatherGridItems(r7.items, svgGridItems), duration, r7.styles, delay)

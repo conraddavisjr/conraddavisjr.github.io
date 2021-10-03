@@ -1,0 +1,39 @@
+.about-sub-page-bio {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: scroll;
+}
+
+.bio-content-container {
+  background: rgba(255, 255, 255, 1);
+  top: calc(100% - 180px);
+  opacity: 0;
+  width: 100%;
+  position: absolute;
+  animation: slideUp .8s forwards;
+  padding-bottom: 146px; /* nav + sub-nav height */
+}
+
+.bio-content.constraint {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.profile-image {
+  background-color: gainsboro;
+  display: block;
+  max-width: 50%;
+  float: right;
+  margin: 0 0 2rem 2rem;
+}
+
+@keyframes slideUp {
+  0% { opacity: 0; }
+  100% {
+    opacity: 1;
+    top: calc(100% - 45vh);
+  }
+}

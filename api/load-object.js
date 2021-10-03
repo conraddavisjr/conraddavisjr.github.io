@@ -4,28 +4,52 @@
  * @param  {[type]} scene [description]
  * @return {[type]}       [description]
  */
-function loadObject(src, scene) {
+function loadObject(src, scene, cb) {
 	console.log('loadObject called: ', src, scene);
+
 	// instantiate a loader
-	var objLoader = new THREE.OBMLoader();
+	const gltfLoader = new THREE.GLTFLoader();
 
-	// load the resource
-	objLoader.load(
-		// resource URL
-		src,
-		// called when resource is loaded
-		function (object) {
-			// enable shadows
-			object.traverse(function (child) {
-			    if (child instanceof THREE.Mesh) {
-		        child.castShadow = true;
-		        child.receiveShadow = true;
-			    }
-			});
+	gltfLoader.load(src, function ( data ) {
 
-			scene.add(object);
-		}
-	);
+		console.log('data: ', data)
+
+		const gltf = data;
+
+		var object = gltf.scene;
+
+			// object.traverse( function ( node ) {
+
+				// console.log('node: ', node)
+				// console.log('node.name: ', node.name)
+
+				// if (node.name == 'Sun') {
+				// 	console.warn('this is the sun light: ', node)
+				// }
+
+				// if ( node.material && ( node.material.isMeshStandardMaterial ||
+				// 	( node.material.isShaderMaterial && node.material.envMap !== undefined ) ) ) {
+
+				// 		// console.log('node.material.isMeshStandardMaterial: ', node.material.isMeshStandardMaterial)
+
+				// 	// node.material.emissiveIntensity = 10.5
+				// 	// node.material.metalness = 1
+				// 	// node.material.roughness = 0
+				// 	console.log('node.material: ', node.material)
+				// 	// node.material.receiveShadows = true;
+				// 	// node.material.aoMapIntensity = 0;
+				// 	node.material.envMap = envMap;
+				// 	node.material.envMapIntensity = 1.5; // boombox seems too dark otherwise
+
+				// }
+
+			// } );
+
+		scene.add(object);
+
+		if (cb) cb(object);
+
+	})
 }
 
 export default loadObject;

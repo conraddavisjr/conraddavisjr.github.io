@@ -4,10 +4,12 @@
  * @param  {[string]} color [the colot of the material]
  * @return {[object]}       [returns the material obj]
  */
-function getMaterial(type, color) {
+function getMaterial(type, color, transparent, opacity) {
 	var selectedMaterial;
 	var materialOptions = {
 		color: color === undefined ? 'rgb(255, 255, 255)' : color,
+		transparent: transparent === undefined ? 'false' : transparent, 
+		opacity: opacity === undefined ? 1 : opacity,
 	};
 
 	switch (type) {

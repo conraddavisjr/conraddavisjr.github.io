@@ -1,158 +1,37 @@
 let workPageHasLoaded = false;
 let workContainerName = 'work-container';
+let workNavName = 'work-nav';
+let workNav;
+let workNavBtns;
 let workPath = 'pages/work';
 let portfolioPath = `${workPath}/portfolio`;
+let workCurrentSubpage;
+let currentPortfolio;
 let workContainer;
-let workThumbnails;
-let closeWorkBtn;
-let openedProfile = {};
+let portScrollDownArrows;
+let closePortBtn;
+let workDownArrow;
 let portfolioIsOpen = false;
+let scaffoldDrawn;
 let workTl = new TimelineLite();
+let loadedSubpages = {};
 let loadedPortfolios = {};
+let portfolioPages = ['workPlay', 'workSamsung', 'workAudi', 'workGather'];
+let portfolioUiScaffold = document.querySelector('.ui-scaffold');
+let outlineHasDrawn;
+let loadedModel;
 
-// store all thubmail position values
-thumbVals = {
-  'work-thumbnail-samsung': {
-    set: {
-      clip: 'rect(0vh, 59.5vw, 35.5vh, 1vw)',
-      zIndex: 2,
-      width: '100vw',
-      height: '100vh'
-    },
-    close: {
-      closing: {
-        clip: 'rect(0vh, 59.5vw, 35.5vh, 1vw)'
-      },
-      reset: {
-        clip: 'rect(0vh, 59.5vw, 35.5vh, 1vw)',
-        width: '59.5vw',
-        height: '35.5vh',
-      }
-    },
-    open: {
-      clip: 'rect(35vh, 80vw, 65vh, 20vw)',
-      left: 0
-    },
-  },
-  'work-thumbnail-wig': {
-    set: {
-      clip: 'rect(0vh, 100vw, 71vh, 61vw)',
-      zIndex: 2,
-      width: '100vw',
-      height: '100vh'
-    },
-    close: {
-      closing: {
-        clip: 'rect(0vh, 100vw, 71vh, 62vw)',
-        right: '1vw'
-      },
-      reset: {
-        clip: 'rect(0vh, 40vw, 71vh, 0vw)',
-        width: '38vw',
-        height: '71vh',
-      }
-    },
-    'open': {
-      clip: 'rect(0vh, 75.5vw, 71vh, 37vw)',
-      right: 0
-    },
-  },
-  'work-thumbnail-audi': {
-    set: {
-      clip: 'rect(36vh, 59.5vw, 71vh, 1vw)',
-      zIndex: 2,
-      width: '100vw',
-      height: '100vh',
-      top: 0
-    },
-    close: {
-      closing: {
-        clip: 'rect(36vh, 58.5vw, 71vh, 0vw)',
-        left: '1vw'
-      },
-      reset: {
-        clip: 'rect(0vh, 58.5vw, 35vh, 0vw)',
-        top: '36vh',
-        width: '58.5vw',
-        height: '35vh'
-      }
-    },
-    open: {
-      clip: 'rect(30vh, 79.5vw, 65.5vh, 21vw)',
-      left: 0
-    },
-  },
-  'work-thumbnail-gather': {
-    set: {
-      clip: 'rect(71.8vh, 98vw, 100vh, 0vw)',
-      zIndex: 2,
-      width: '100vw',
-      height: '100vh',
-      top: 0
-    },
-    close: {
-      closing: {
-        clip: 'rect(71.8vh, 98vw, 100vh, 0vw)',
-        left: '1vw'
-      },
-      reset: {
-        clip: 'rect(0.7vh, 100vw, 35vh, 0vw)',
-        top: '71vh',
-        width: '98vw',
-        height: '35vh',
-        left: '1vw',
-        height: '30vh'
-      }
-    },
-    open: {
-      clip: 'rect(22vh, 99vw, 60vh, 1vw)',
-      left: 0
-    }
-  }
-}
-
-function workPage(uiPanel, apiCollection, loadObject, scene, camera) {
+function workPage(uiPanel, apiCollection, scene, camera) {
   // if the page hasn't loaded yet, populate it in the DOM
   if(!workPageHasLoaded) {
 
     // load ui template styles
-    apiCollection.loadStyles(`${workPath}/styles.css`).then(buildUI());
-
-    // load all of the porfolio previews
-    // apiCollection.loadScript(`${portfolioPath}/samsung-preview.js`)
-    // .then(() => apiCollection.loadScript(`${portfolioPath}/wig-preview.js`)
-    //   .then(() => apiCollection.loadScript(`${portfolioPath}/audi-preview.js`)
-    //     .then(() => apiCollection.loadScript(`${portfolioPath}/gather-preview.js`)
-    //       .then(buildUI)
-    //     )
-    //   )
-    // )
-
-    // reset window dimensions on resize
-    window.addEventListener('resize', updateThumbBg);
-
-    // define work UI scaffold
-    let uiScaffold = document.querySelector('.ui-scaffold');
-
-    function updateThumbBg() {
-      if (workThumbnails) {
-        let largerWinDim = window.largerWinDim;
-        let bgDim = largerWinDim == 'winW' ? '100vw 100vw' : '100vh 100vh';
-        workThumbnails.forEach((thumbnail) => {
-          thumbnail.style.backgroundSize = bgDim;
-        });
-      }
-    }
+    window.apiCollection.loadStyles(`${workPath}/styles.css`).then(buildUI());
 
     // listen for keyboard button press
     document.onkeydown = handleKeyDown;
 
-    // listen for clicks on the workThumbnails
-    window.workThumbnailClick = function workThumbnailClick(e) {
-      let thumbnail = e.target;
-      openPortfolio(thumbnail);
-    }
-
+    // remove the img-loading class from loaded images
     window.imageLoaded = function imageLoaded(e) {
       let target = e.target;
       let targetParent = target.parentNode;
@@ -160,192 +39,58 @@ function workPage(uiPanel, apiCollection, loadObject, scene, camera) {
       targetParent.classList.remove('img-loading');
     }
 
-    function openPortfolio(thumbnail) {
-      // ignore if the porfolio is already opened
-      if(portfolioIsOpen) return;
-      portfolioIsOpen = true;
-
-      let tl = new TimelineLite();
-      let projName = thumbnail.getAttribute('projName');
-      // get the thumbnail's class name
-      let thumbnailClass = thumbnail.classList[1];
-      // get the 'open' and 'set' styles data
-      let styles_O = thumbVals[thumbnailClass]['open'];
-      let styles_S = thumbVals[thumbnailClass]['set'];
-      // thumbnail some thumbnail elements
-      let img = thumbnail.querySelector('.work-preview-img');
-      let copy = thumbnail.querySelector('.copy-container');
-      // make the close button visible
-      closeWorkBtn.classList.add('is-visible');
-
-      // update the openedProfile state with
-      // the thumbnail and its class
-      openedProfile['thumbnail'] = thumbnail;
-      openedProfile['copy'] = copy;
-      openedProfile['classList'] = thumbnailClass;
-
-      // hide thumbnail copy
-      tl.set(copy, {opacity: 0})
-      // set preliminary styles on the thumbnail
-      tl.set(thumbnail, styles_S)
-      // move the clipping to the center of the dom
-      tl.to(thumbnail, 0.5, styles_O)
-      // reveal the full image
-      tl.to(thumbnail, 0.5, {
-        clip: 'rect(0vh, 100vw, 100vh, 0vw)',
-        ease: Power3.easeOut,
-      })
-      // make the children elements selectable
-      tl.call(() => thumbnail.classList.add('children-selectable'))
-
-      // load the detail view of the portfolio item
-      // first check if the detail view has been loaded
-      // if it has, only render it
-      let detailsHasLoaded = false;
-      let scaffoldDrawn = false;
-
-      if (Object.keys(loadedPortfolios).includes(projName)) {
-        // reveal the portfolio details
-        console.log('loadedPortfolios[projName]: ', loadedPortfolios[projName]);
-        tl.to(loadedPortfolios[projName], .5, {display: 'block', opacity: 1})
-      }
-      else {
-        // display the uiScaffold
-        tl.call(() => uiScaffold.style.display = 'block');
-
-        // set a two second timer for the uiScaffold loader
-        // filp a flag when the timer is complete
-        setTimeout(() => {
-          scaffoldDrawn = true
-          // if the details page has loaded, reveal it
-          if (detailsHasLoaded) {
-            initDetailsPageRender(uiScaffold, projName);
-          }
-        }, 2900);
-
-        // load the details
-        apiCollection.loadScript(`${portfolioPath}/${projName}-details.js`)
-        .then(() => {
-          // inject the detail view into the thumbnail
-          thumbnail.insertAdjacentHTML('afterbegin', window[`${projName}Details`]());
-          // declare that the details view has loaded
-          detailsHasLoaded = true;
-
-          // load the details page controller
-          apiCollection.loadScript(`${portfolioPath}/details-controller.js`)
-
-          // register the loaded the portfolio
-          loadedPortfolios[projName] = uiPanel.querySelector(`.${projName}-details`);
-
-          // reveal the portfolio details
-          // if the scaffold completed drawing
-          if (scaffoldDrawn) {
-            initDetailsPageRender(uiScaffold, projName);
-          }
-        })
-      }
-
-
-      // flip a flag when the detail page has loaded
-
-      // // blur and desaturate the thumb image
-      // tl.call(() => {
-      //   if(portfolioIsOpen) {
-      //     thumbnail.classList.add('press-blur'), '-=.5'
-      //   }
-      // })
-    }
-
-    function initDetailsPageRender(uiScaffold, projName) {
-      let tl = new TimelineLite();
-      tl.set(uiScaffold, {display: 'none'})
-      tl.to(loadedPortfolios[projName], 1, {display: 'block', opacity: 1}, "+=.1")
-    }
-
     function handleKeyDown(e) {
-      if(e.key == "Escape" && portfolioIsOpen) closePortfolio();
-    }
-
-    /**
-     * close a portfolio
-     */
-    function closePortfolio() {
-      portfolioIsOpen = false;
-      let tl = new TimelineLite();
-      let {thumbnail, classList, img, copy} = openedProfile;
-      let styles = thumbVals[`${classList}`]['close'];
-      let projName = thumbnail.getAttribute('projName');
-
-      // remove the close button
-      closeWorkBtn.classList.remove('is-visible');
-
-      styles['closing']['ease'] = Power3.easeOut;
-      styles['reset']['zIndex'] = 1;
-
-      // hide the uiScaffold and the portfolio details
-      // and make the children elements non-selectable
-      tl.call(() => {
-        uiScaffold.style.display = 'none';
-        loadedPortfolios[projName].style.display = 'none';
-        loadedPortfolios[projName].style.opacity = 0;
-        thumbnail.classList.remove('children-selectable')
-      })
-      // run thumbnail closing animation
-      tl.to(thumbnail, .5, styles['closing'])
-      // reset the thumb to its original position
-      tl.set(thumbnail, styles['reset'])
-      tl.to(copy, .3, {opacity: 1} )
+      if (e.key == "Escape" && portfolioIsOpen) closePortfolio();
     }
 
     function buildUI() {
-      // loadObject('models/work_section.obm', scene);
-
       // generate ui template
       let interfaceUI = `
-        <div class='work-container content-container'>
-          <div class='work-container-inner'>
-            <div class='close-btn'></div>
-            <div class='content'>
-              <div
-                onclick="workThumbnailClick(event)"
-                class="work-thumbnail work-thumbnail-samsung img-loading"
-                projName="samsung">
-                <img onload="imageLoaded(event)" src="/pages/work/img/Cool-Beautiful-Wallpaper.jpg">
-                <div class="copy-container">
-                  <p>Samsung</p>
-                  <h2>Gear S2 Campaign</h2>
-                </div>
+        <div class="${workContainerName}">
+          <div class="close-portfolio-button" style="display:none">X</div>
+          <div class=${workNavName}>
+            <div class="work-nav-arrows" style="display:none">
+              <div class="left">
+                <svg class="svg-arrow" viewBox="0 0 24 24">
+                  <path d="M5.88 4.12L13.76 12l-7.88 7.88L8 22l10-10L8 2z"/>
+                  <path fill="none" d="M0 0h24v24H0z"/>
+                </svg>
               </div>
-              <div
-                onclick='workThumbnailClick(event)'
-                class='work-thumbnail work-thumbnail-wig img-loading'
-                projName="wig">
-                <img onload="imageLoaded(event)" src="/pages/work/img/CTG-thumbnail.png">
-                <div class="copy-container">
-                  <p>Google</p>
-                  <h2>Women in Gaming</h2>
-                </div>
+              <div class="right">
+                <svg class="svg-arrow" viewBox="0 0 24 24">
+                  <path d="M5.88 4.12L13.76 12l-7.88 7.88L8 22l10-10L8 2z"/>
+                  <path fill="none" d="M0 0h24v24H0z"/>
+                </svg>
               </div>
-              <div
-                onclick='workThumbnailClick(event)'
-                class='work-thumbnail work-thumbnail-audi img-loading'
-                projName="audi">
-                <img onload="imageLoaded(event)" src="/pages/work/img/audi.jpg">
-                <div class="copy-container">
-                  <p>Audi</p>
-                  <h2>AudiUSA.com</h2>
-                </div>
-              </div>
-              <div
-                onclick='workThumbnailClick(event)'
-                class='work-thumbnail work-thumbnail-gather img-loading'
-                projName="gather">
-                <img onload="imageLoaded(event)" src="/pages/work/img/Cool-Beautiful-Wallpaper.jpg">
-                <div class="copy-container">
-                  <p>Google</p>
-                  <h2>Gather: Event Planning</h2>
-                </div>
-              </div>
+            </div>
+          </div>
+
+          <div class="work-sub-page work-sub-page-workGather" style="opacity: 0">
+            <div class="work-sub-page-content">
+              <h1>Google Gather</h1>
+              <h2>Global campaigns</h2>
+              <div class="port-cta gather"> See details </div>
+            </div>
+          </div>
+          <div class="work-sub-page work-sub-page-workPlay" style="opacity: 0">
+            <div class="work-sub-page-content">
+              <h1>Google Play</h1>
+              <h2>Change the Game campaign</h2>
+              <div class="port-cta play"> See details </div>
+            </div>
+          </div>
+          <div class="work-sub-page work-sub-page-workSamsung" style="opacity: 0">
+            <div class="work-sub-page-content">
+              <h1>Samsung</h1>
+              <h2>Gear S2 campaign</h2>
+              <div class="port-cta samsung"> See details </div>
+            </div>
+          </div>
+          <div class="work-sub-page work-sub-page-workAudi" style="opacity: 0">
+            <div class="work-sub-page-content">
+              <h1>Audi</h1>
+              <h2>USA Website</h2>
+              <div class="port-cta audi"> See details </div>
             </div>
           </div>
         </div>
@@ -358,23 +103,253 @@ function workPage(uiPanel, apiCollection, loadObject, scene, camera) {
 
     function mountInterface() {
       workContainer = document.querySelector(`.${workContainerName}`);
-      workThumbnails = document.querySelectorAll('.work-thumbnail');
-      closeWorkBtn = workContainer.querySelector('.close-btn');
-      closeWorkBtn.addEventListener('click', closePortfolio);
+      workNav = document.querySelector(`.${workNavName}`);
+      closePortBtn = document.querySelector('.close-portfolio-button');
+      workDownArrow = document.querySelector('.work-down-arrow');
+      workNavArrows = document.querySelector('.work-nav-arrows');
+      let workNavLeft = workNav.querySelector('.left');
+      let workNavRight = workNav.querySelector('.right');
+      const workButton = document.querySelector('.work-button');
+      const gGatherCta = document.querySelector('.port-cta.gather');
+      const gPlayCta = document.querySelector('.port-cta.play');
+      const audiCta = document.querySelector('.port-cta.audi');
+      const samsungCta = document.querySelector('.port-cta.samsung');
+
+      workButton.addEventListener('click', () => {
+        // set the current sub-page to this page
+        workCurrentSubpage = null;
+        workTl.set(
+          [closePortBtn, workDownArrow],
+          {visibility: 'hidden', opacity: 0}
+        );
+        hidePages();
+        shiftSubNav(false);
+        navVisibility(null, true);
+      });
+
+      closePortBtn.addEventListener('click', () => closePortfolio());
+      gGatherCta.addEventListener('click', () => window.renderPortfolioPage('workGather', 'workLookUp'));
+      gPlayCta.addEventListener('click', () => window.renderPortfolioPage('workPlay', 'workLookUp'));
+      audiCta.addEventListener('click', () => window.renderPortfolioPage('workAudi', 'workLookUp'));
+      samsungCta.addEventListener('click', () => window.renderPortfolioPage('workSamsung', 'workLookUp'));
+      workNavLeft.addEventListener('click', () => workNavClick('left'));
+      workNavRight.addEventListener('click', () => workNavClick('right'));
+
       renderWorkPage();
-      // set the thumb BG dim on init
-      updateThumbBg();
     }
+
+    // declare that that the work page has loaded,
+    // voiding the need to reload it.
     workPageHasLoaded = true;
   }
   else {
     renderWorkPage();
   }
 
+  /**
+   * close a portfolio
+   */
+  function closePortfolio() {
+    workTl.set(
+      [closePortBtn, workDownArrow],
+      {visibility: 'hidden', opacity: 0}
+    );
+    hidePages();
+    shiftSubNav(true);
+    navVisibility(null, true);
+    window.apiCollection.handlePageTransitions(
+      currentPortfolio,
+      () => renderContent(currentPortfolio, 'subPage')
+    );
+  }
+
+  function workNavClick(direction) {
+    const subpageIndex = portfolioPages.indexOf(workCurrentSubpage);
+    const cycleToPage = direction === 'left' ?
+      cycleLeft(subpageIndex, portfolioPages) :
+      cycleRight(subpageIndex, portfolioPages);
+
+    hidePages();
+
+    window.apiCollection.handlePageTransitions(
+      cycleToPage,
+      () => renderContent(cycleToPage, 'subPage')
+    );
+    shiftSubNav(true);
+  };
+
+  function cycleLeft(index, arr) {
+    return index === 0 ? arr[arr.length - 1] : arr[index - 1];
+  }
+
+  function cycleRight(index, arr) {
+    return index === arr.length - 1 ? arr[0] : arr[index + 1];
+  }
+
+  function hidePages() {
+    const subpages =
+      Object.keys(loadedSubpages).map(subpage => loadedSubpages[subpage]);
+
+    const portfolios =
+      Object.keys(loadedPortfolios).map(port => loadedPortfolios[port]);
+
+    if (!subpages || !portfolios) return;
+
+    workTl.to([subpages, portfolios], .5, {opacity: 0})
+    workTl.set([subpages, portfolios], {display: 'none'})
+  }
+
+  function shiftSubNav(willRender) {
+    willRender ?
+      workNav.classList.add('set-subnav') :
+      workNav.classList.remove('set-subnav');
+  }
+
+  function renderContent(page, type) {
+    let contentModel;
+    let hasUIScaffold = false;
+    
+    // set the current sub-page to this page
+    workCurrentSubpage = page;
+    
+    // if the page is being called for the first time, async load it
+    if (!Object.keys(loadedSubpages).includes(page)) {
+      const subPageEl = document.querySelector(`.work-sub-page-${page}`);
+      workTl.to([workNavArrows], .5, {display: 'flex', opacity: 1});
+
+      // add the El to the loadedSubpages
+      loadedSubpages[page] = subPageEl;
+    }
+    switch (type) {
+      case 'subPage':
+        // reveal the sub-page
+        workTl.to(loadedSubpages[page], .5, {display: 'block', opacity: 1, visibility: 'visible'});
+        break;
+      case 'portfolio':
+        // set the current portfolio to this page
+        currentPortfolio = page;
+        contentModel = loadedPortfolios;
+        hasUIScaffold = true;
+
+        if (Object.keys(contentModel).includes(page)) {
+          // reveal the portfolio page
+          workTl.to(
+            closePortBtn,
+            .5, {display: 'flex', visibility: 'visible', opacity: 1});
+
+          workTl.to(
+            [contentModel[page], workDownArrow],
+            .5, {display: 'block', opacity: 1});
+        } else {
+          loadPage(page, type, hasUIScaffold);
+        }
+        break;
+    }
+  }
+
+  function loadPage(page, type, hasUIScaffold = false) {
+    let folderName;
+    let pageType;
+
+    switch (type) {
+      case 'subPage':
+        folderName = 'subPages'
+        pageType = 'Subpage'
+        break;
+      case 'portfolio':
+        folderName = 'portfolio'
+        pageType = 'Portfolio'
+        break;
+    }
+
+    if (hasUIScaffold) drawScaffoldOutline();
+
+    window.apiCollection.loadStyles(`${workPath}/${folderName}/${page}.css`)
+    window.apiCollection.loadScript(`${workPath}/${folderName}/${page}.js`)
+    .then(() => {
+      // inject the portfolio component into the work container
+      workContainer.insertAdjacentHTML(
+        'beforeend', window[`${page}${pageType}`]().getView()
+      );
+
+      // register the loaded portfolio
+      loadedPortfolios[page] =
+          workContainer.querySelector(`.work-portfolio-${page}`);
+      loadedModel = loadedPortfolios[page];
+      loadedModel.contentHasLoaded = true;
+
+      // reveal the selected page if the scaffold outline animation concluded
+      if (outlineHasDrawn || !hasUIScaffold) {
+        workTl.to(loadedModel, .5, {display: 'block', opacity: 1});
+        workTl.set(
+          [closePortBtn, workDownArrow],
+          {visibility: 'visible', display: 'flex', opacity: 1}
+        );
+      }
+    })
+  }
+
+  window.renderPortfolioPage = (name, movementOption) => {
+    navVisibility(name, false);
+    window.apiCollection.handlePageTransitions(
+      movementOption ? movementOption : `${name}`,
+      () => renderContent(`${name}`, 'portfolio')
+    );
+  }
+
+  function drawScaffoldOutline(duration = 2000) {
+    workTl.set(
+      portfolioUiScaffold,
+      { display: 'block', transition: `${duration}s` }
+    );
+
+    // set a 'x'(duration) second timer for the portfolioUiScaffold loader
+    // flip a flag when the timer is complete
+    setTimeout(() => {
+      outlineHasDrawn = true;
+
+      // if the details page has loaded, reveal it and hide the scaffold
+      if (loadedModel) {
+        workTl.set(portfolioUiScaffold, {display: 'none'});
+        workTl.to(loadedModel, .5, {display: 'block', opacity: 1});
+        workTl.to(
+          [closePortBtn, workDownArrow], .5,
+          {visibility: 'visible', display: 'flex', opacity: 1}
+        );
+
+        // reset the value ot the loadedModel
+        loadedModel = null;
+      }
+    }, duration);
+  }
+
+  function navVisibility(name, isVisible) {
+    if (isVisible) {
+      workTl.to([loadedSubpages[name], workNav], .75, {opacity: 1});
+    } else {
+      workTl.to([loadedSubpages[name], workNav], .75, {opacity: 0})
+    }
+  }
+
   // fade in the UI
   function renderWorkPage() {
     workContainer.style.opacity = 1;
     workContainer.style.visibility = 'visible';
-    workTl.staggerFromTo(workThumbnails, 1, {y: +50, opacity: 0}, {y: 0, opacity: 1}, .2)
+  }
+
+  function scrollDownPage(el) {
+    var scrollEl = workContainer.querySelector(`.${el}`);
+    // apply an event listener to the arrows
+    scrollEl.scrollTo({
+      top: window.innerHeight - 100,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  // make the functions below public
+  return {
+    scrollDownPage,
+    closePortfolio
   }
 }

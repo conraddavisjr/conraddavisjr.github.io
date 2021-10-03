@@ -1,88 +1,73 @@
 /**
  * positionLights set the placement of all of the scene's lights
- * @param  {[object]} group [a collection of the light objects]
+ * @param  {[object]} lights [a collection of the light objects]
  * @return {[null]}       [description]
  */
-function positionLights(group) {
+function positionLights(lights) {
 
 	const {
 		dirLight,
-		ambLight,
-		centerStageLight,
-		aboutStagelampLight,
-		aboutLampLightBulb,
-		aboutfloatingLight,
-		workLampLightRight,
-		workLampLightLeft,
-		skillsfloatingLightLeft,
-		skillsfloatingLightRight,
-		skillsfloatingLightMid
-	} = group;
+		homeSpotLight,
+		aboutSpotLight,
+		aboutSpotLightBio,
+		aboutSpotLightSkills,
+		workCenterLight,
+		workLightPlay
+	} = lights;
 
 
 	// directional lighting
-	dirLight.position.set( 50, 200, 100 );
+	dirLight.position.set(38, 69, 40);
 
-	// center stage lighting
-	centerStageLight.position.set(5, 20, 0);
-	centerStageLight.intensity = 0.16;
+	// home section lights
+	homeSpotLight.position.set(49, 35, -8.7);
+	homeSpotLight.angle = 1;
+	homeSpotLight.penumbra = 0;
+	homeSpotLight.distance = 35;
 
-	// the light bulb for the lamp in the about section
-	aboutLampLightBulb.position.set(0.2, 23.8, 30);
+	// about section lights
+	// general
+	aboutSpotLight.position.set(24, -20, 24.4);
+	aboutSpotLight.angle = .43;
+	aboutSpotLight.penumbra = 1;
+	aboutSpotLight.target.position.x = -88;
+	aboutSpotLight.target.position.y = 75;
+	aboutSpotLight.target.position.z = -8.7;
+	aboutSpotLight.target.updateMatrixWorld();
+	// bio
+	aboutSpotLightBio.position.set(-35, 31, -20);
+	aboutSpotLightBio.intensity = 1.7;
+	aboutSpotLightBio.penumbra = .38;
+	aboutSpotLightBio.angle = 1;
+	aboutSpotLightBio.distance = 32;
+	aboutSpotLightBio.target.position.x = -29;
+	aboutSpotLightBio.target.position.y = -100;
+	aboutSpotLightBio.target.position.z = 9;
+	aboutSpotLightBio.target.updateMatrixWorld();
+	// skills
+	aboutSpotLightSkills.position.set(-46, 49, 13);
+	aboutSpotLightSkills.intensity = 1.2;
+	aboutSpotLightSkills.penumbra = .54;
+	aboutSpotLightSkills.angle = .5;
+	aboutSpotLightSkills.distance = 71;
+	aboutSpotLightSkills.target.position.x = -88;
+	aboutSpotLightSkills.target.position.y = 0;
+	aboutSpotLightSkills.target.position.z = .2;
+	aboutSpotLightSkills.target.updateMatrixWorld();
 
-	// the light bulb for the lamp in the about section
-	aboutfloatingLight.position.set(5, 11, 20);
-	aboutfloatingLight.intensity = 0.7;
-
-	// work section right light properties
-	workLampLightRight.position.set(6, 7, 31);
-	workLampLightRight.intensity = 0.8;
-	workLampLightRight.angle = 0.6;
-	workLampLightRight.penumbra = 0.05;
-	workLampLightRight.target.position.x = 31;
-	workLampLightRight.target.position.y = 31;
-	workLampLightRight.target.position.z = 0;
-	workLampLightRight.target.updateMatrixWorld();
-
-	// work section left light properties
-	workLampLightLeft.position.set(22, 4.5, 27);
-	workLampLightLeft.intensity = 0.8;
-	workLampLightLeft.angle = 0.5;
-	workLampLightLeft.penumbra = 0.07;
-	workLampLightLeft.target.position.x = 0.2;
-	workLampLightLeft.target.position.y = 18;
-	workLampLightLeft.target.position.z = 29;
-	workLampLightLeft.target.updateMatrixWorld();
-
-	// skills section left light properties
-	skillsfloatingLightLeft.position.set(16, 0, -20);
-	skillsfloatingLightLeft.intensity = 0.6;
-	skillsfloatingLightLeft.angle = 0.6;
-	skillsfloatingLightLeft.penumbra = 0.02;
-	skillsfloatingLightLeft.target.position.x = 0;
-	skillsfloatingLightLeft.target.position.y = 5;
-	skillsfloatingLightLeft.target.position.z = -17;
-	skillsfloatingLightLeft.target.updateMatrixWorld();
-
-	// skills section right light properties
-	skillsfloatingLightRight.position.set(7, 11, -24);
-	skillsfloatingLightRight.intensity = 0.5;
-	skillsfloatingLightRight.angle = 0.5;
-	skillsfloatingLightRight.penumbra = 0.02;
-	skillsfloatingLightRight.target.position.x = -11;
-	skillsfloatingLightRight.target.position.y = 0;
-	skillsfloatingLightRight.target.position.z = 16;
-	skillsfloatingLightRight.target.updateMatrixWorld();
-
-	// skills section right light properties
-	skillsfloatingLightMid.position.set(17.8, 11, -17);
-	skillsfloatingLightMid.intensity = 0.7;
-	skillsfloatingLightMid.angle = 0.7;
-	skillsfloatingLightMid.penumbra = 0.02;
-	skillsfloatingLightMid.target.position.x = -29;
-	skillsfloatingLightMid.target.position.y = 0;
-	skillsfloatingLightMid.target.position.z = -24;
-	skillsfloatingLightMid.target.updateMatrixWorld();
+	// work section lights
+	// general
+	workCenterLight.position.set(-4, 13, -9);
+	workCenterLight.distance = 27;
+	// google play
+	workLightPlay.position.set(-7, 22, -9);
+	workLightPlay.penumbra = 0;
+	workLightPlay.angle = .2;
+	workLightPlay.distance = 71;
+	workLightPlay.target.position.x = -33;
+	workLightPlay.target.position.y = -53;
+	workLightPlay.target.position.z = -100;
+	workLightPlay.target.updateMatrixWorld();
 }
 
 export default positionLights;

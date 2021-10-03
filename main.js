@@ -1,10 +1,9 @@
 import loadScript from './api/load-script.js';
 import svgGrid from './assets/svg/grid.js';
 import loadIcon from './assets/svg/loadIcon.js';
-import gatherGridItems from './api/helpers/gatherGridItems.js';
 import introAnimations from './api/intro-animations.js';
 import preLoadAnimation from './api/animations/preload.js';
-import postLoadAnimation from './api/animations/postLoad.js';
+import postLoadAnimation from './api/animations/postload.js';
 import updateLoadProgress from './api/animations/update-load-progress.js';
 import getSvgDimensions from './api/helpers/getSvgDimensions.js';
 
@@ -13,22 +12,18 @@ import getSvgDimensions from './api/helpers/getSvgDimensions.js';
  */
 let webGLWorldLoaded = false;
 let tl = new TimelineLite();
-let selectedPage;
-let canSetGreaterWinDim = true;
+window.selectedPage;
 
 /*
   query elements
  */
 let title = document.querySelector('.title');
 let nav = document.querySelector('nav');
-let homeButton = document.querySelector('.home-button');
-let aboutButton = document.querySelector('.about-button');
-let workButton = document.querySelector('.work-button');
-let skillsButton = document.querySelector('.skills-button');
+let mainNavItems = nav.querySelectorAll('li');
 let svgGridContainer = document.querySelector('.svg-grid-container');
 let webgl = document.querySelector('#webgl');
 let uiPanel = document.querySelector('.ui-panel');
-let loaderTakover = document.querySelector('.loader-takover');
+let loaderTakeover = document.querySelector('.loader-takeover');
 
 // insert the SVG grid into the DOM
 svgGridContainer.insertAdjacentHTML('afterbegin', svgGrid);
@@ -44,10 +39,13 @@ let loadIconSvg = document.querySelector('.load-icon');
 introAnimations(svgGridItems)
 
 // listen to nav menu clicks
-homeButton.addEventListener('click', () => runLoader('home'));
-aboutButton.addEventListener('click', () => runLoader('about'));
-workButton.addEventListener('click', () => runLoader('work'));
-skillsButton.addEventListener('click', () => runLoader('skills'));
+mainNavItems.forEach((item) => {
+  item.addEventListener('click', (el) => {
+    const pageName = el.target.className.replace('-button', '');
+    runLoader(pageName, el);
+  })
+})
+
 
 // get window dimensions on load
 window.onload = handleWinAndSvgDimensions();
@@ -74,23 +72,31 @@ window.renderImg = function renderImg(e) {
 }
 
 // begin the loading process for the main experience
-function runLoader(page) {
+function runLoader(page, el) {
+  setActiveNavState(el);
   if (webGLWorldLoaded) return;
+
   let fadeList = [
     title,
     nav
   ]
   // store the initially selected page on the window
-  selectedPage = page;
-  // disable and hide all fadeList
+  window.selectedPage = page;
+  // disable and hide all fadeList elements
   tl.set(fadeList, {pointerEvents: 'none'})
   tl.to(fadeList, 0.5, {opacity: 0});
   // pause the intro animation
   introAnimations().pauseIntroAnimation();
   // run the pre loading world animation
   preLoadAnimation(loadIconSvg, svgGridItems);
-  // listen for when the proload has completed, then load the webGL world
+  // listen for when the preload has completed, then load the webGL world
   window.addEventListener('preLoadComplete', () => loadWebglWorld(nav), false);
+}
+
+function setActiveNavState(el) {
+  // clear all active items before setting the active class
+  mainNavItems.forEach((item) => item.classList.remove('active'));
+  el.target.classList.add('active');
 }
 
 // asynchronously load the 3d world and its dependencies
@@ -107,19 +113,20 @@ function loadWebglWorld(nav) {
     () => {
       postLoadAnimation(
         webgl,
-        loaderTakover,
+        loaderTakeover,
         initialNav,
-        getSvgDimensions
+        getSvgDimensions,
+        svgGridContainer
       ), false
     }
   );
 }
 
 function initialNav() {
-  window.handlePageTransitions(selectedPage)
+  window.handlePageTransitions(window.selectedPage)
   // enable and reveal nav buttons
   tl.set(nav, {pointerEvents: 'auto'})
-  tl.set(loaderTakover, {display: 'none'})
+  tl.set(loaderTakeover, {display: 'none'})
   tl.fromTo(nav, 1.5, {opacity: 0, y: +50}, {opacity: 1, y: 0}, '+=1.5');
 }
 

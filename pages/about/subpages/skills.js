@@ -9,7 +9,7 @@ function skillsSubpage() {
 			<div class="about-effects-fill"></div>
 			<div class="skills-content">
 				<div class="skills-description">
-					I am a Full-stack Web engineer with a specialty in data-driven applications
+					I am a Sr. full-stack Web engineer with a specialty in data-driven applications
 					and visual effects. Over my ${yearsInCareer} year career, I've had the fortune to
 					develop a wide range of skills in the arts, engineering, and leadership.
 					Below is a short list of some of my favorites...
@@ -22,6 +22,7 @@ function skillsSubpage() {
 							<span>Javascript</span>
 							<span>Typescript</span>
 							<span>Node.js</span>
+							<span>Python</span>
 						</div>
 					</div>
 
@@ -44,6 +45,9 @@ function skillsSubpage() {
 							<span>Phaser</span>
 							<span>Express.js</span>
 							<span>Next.js</span>
+							<span>Remix.js</span>
+							<span>Nest.js</span>
+							<span>Airflow</span>
 							<span>Redux toolkit</span>
 						</div>
 					</div>
@@ -55,6 +59,8 @@ function skillsSubpage() {
 							<span>MySQL</span>
 							<span>SQLite</span>
 							<span>Google Firestore</span>
+							<span>Amazon RDS</span>
+							<span>Postgres</span>
 						</div>
 					</div>
 
@@ -62,9 +68,9 @@ function skillsSubpage() {
 						<div class="item-title">Functional testing</div>
 						<div class="sub-items">
 							<span>Jest</span>
-							<span>RTL</span>
-							<span>Enzyme</span>
+							<span>React Testing Library</span>
 							<span>Cypress</span>
+							<span>Enzyme</span>
 						</div>
 					</div>
 
@@ -87,8 +93,8 @@ function skillsSubpage() {
 							<span>Figma</span>
 							<span>Photoshop</span>
 							<span>Illustrator</span>
+							<span>Miro</span>
 							<span>After Effects</span>
-							<span>ProTools</span>
 							<span>Final Cut Pro</span>
 						</div>
 					</div>

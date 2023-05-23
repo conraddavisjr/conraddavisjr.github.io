@@ -427,7 +427,7 @@ function webglWorld() {
 				let {bx, by, bz} = workPinBoundingBoxPositions[i].pos;
 
 				// load the ui fonts
-				let text = buildText(font, '0xffffff', dataObj[i].copy);
+				let text = buildText(font, 'white', dataObj[i].copy);
 				let pinRadius = pin.geometry.parameters.radius;
 
 				// set a position exception for the Samsung copy

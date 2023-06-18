@@ -1,11 +1,11 @@
-import loadScript from './api/load-script.js';
+import loadScript from './methods/load-script.js';
 import svgGrid from './assets/svg/grid.js';
 import loadIcon from './assets/svg/loadIcon.js';
-import introAnimations from './api/intro-animations.js';
-import preLoadAnimation from './api/animations/preload.js';
-import postLoadAnimation from './api/animations/postload.js';
-import updateLoadProgress from './api/animations/update-load-progress.js';
-import getSvgDimensions from './api/helpers/getSvgDimensions.js';
+import introAnimations from './methods/intro-animations.js';
+import preLoadAnimation from './methods/animations/preload.js';
+import postLoadAnimation from './methods/animations/postload.js';
+import updateLoadProgress from './methods/animations/update-load-progress.js';
+import getSvgDimensions from './methods/helpers/getSvgDimensions.js';
 
 /*
   state

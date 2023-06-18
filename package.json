@@ -23,5 +23,6 @@
     "gulp-rename": "^1.2.2",
     "gulp-terser": "^1.2.0",
     "gulp-uglify": "^1.5.3"
-  }
+  },
+  "engines": { "node": "18.x" }
 }
